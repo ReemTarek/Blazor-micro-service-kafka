@@ -1,0 +1,27 @@
+﻿@page "/products"
+@using ECommerce.Model
+@inject HttpClient Http
+<h3>ProductList</h3>
+<div class="container">
+    @foreach (var product in productList)
+    {
+        <MudCard Elevation="2" Class="my-2">
+            <MudCardContent>
+                <MudText>@product.Name</MudText>
+                <MudText>@product.Price</MudText>
+                <MudText>@product.Quantity</MudText>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Color="Color.Primary" Href=@("/cart/"+product.Id)>Add to Cart</MudButton>
+            </MudCardActions>
+        </MudCard>
+    }
+</div>
+@code {
+    private List<ProductModel> productList = new List<ProductModel>();
+    protected override async Task OnInitializedAsync()
+    {
+        productList = await Http.GetFromJsonAsync<List<ProductModel>>("https://localhost:7125/api/product");
+        await base.OnInitializedAsync();
+    }
+}

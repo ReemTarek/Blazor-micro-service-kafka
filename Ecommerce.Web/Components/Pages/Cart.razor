@@ -1,0 +1,54 @@
+﻿@page "/cart/{ProductId:int}"
+@using ECommerce.Model
+@inject HttpClient http
+@inject IJSRuntime js
+<h3>Cart</h3>
+<MudForm>
+    <div class="row">
+        <div class="col-md-6">
+            <MudCard Elevation="2" Class="my-2">
+                <MudCardContent>
+                    <MudText>@product.Name</MudText>
+                    <MudText>@product.Price</MudText>
+                </MudCardContent>
+              
+            </MudCard>
+        </div>
+        <div class="col-md-6">
+            <MudCard Elevation="2" Class="my-2">
+                <MudCardContent>
+                    <MudTextField Label="Customer Name" @bind-Value="order.CustomerName" />
+
+                </MudCardContent>   
+                <MudCardContent>
+                    <MudTextField Label="Quantity" @bind-Value="order.Quantity" />
+
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Color="Color.Primary" OnClick="CreateOrder">Place Order</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </div>
+    </div>
+</MudForm>
+@code {
+    [Parameter]
+    public int ProductId { get; set; }
+    public OrderModel order = new OrderModel();
+    public ProductModel product =new  ProductModel();
+    protected override async Task OnInitializedAsync()
+    {
+        order.ProductId = ProductId;
+        product = await http.GetFromJsonAsync<ProductModel>($"https://localhost:7125/api/product/{ProductId}");
+        await base.OnInitializedAsync();
+    }
+    async Task CreateOrder()
+    {
+        var res = await http.PostAsJsonAsync<OrderModel>("https://localhost:7288/api/order", order);
+        if (res.IsSuccessStatusCode)
+        {
+           await js.InvokeVoidAsync("alert", "Order Placed Successfully");
+        };
+    }
+}
+

@@ -1,0 +1,32 @@
+﻿@page "/orders"
+@using ECommerce.Model
+@inject HttpClient Http
+<h3>Order List</h3>
+<div class="container">
+ 
+        <MudTable Items="orderList" Elevation="2">
+            <HeaderContent>
+                <MudTh> #</MudTh>
+                <MudTh>Customer</MudTh>
+                <MudTh>Product</MudTh>
+                <MudTh>Quantity</MudTh>
+                <MudTh>Date</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="#">@context.Id</MudTd>
+                <MudTd DataLabel="Customer">@context.CustomerName</MudTd>
+                <MudTd DataLabel="Product">@context.ProductId</MudTd>
+                <MudTd DataLabel="Quantity">@context.Quantity</MudTd>
+                <MudTd DataLabel="Date">@context.OrderDate</MudTd>
+            </RowTemplate>
+        </MudTable>
+  
+</div>
+@code {
+    private List<OrderModel> orderList = new List<OrderModel>();
+    protected override async Task OnInitializedAsync()
+    {
+        orderList = await Http.GetFromJsonAsync<List<OrderModel>>("https://localhost:7288/api/order");
+        await base.OnInitializedAsync();
+    }
+}
