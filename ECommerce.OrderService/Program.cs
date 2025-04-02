@@ -1,5 +1,6 @@
 using ECommerce.Common;
 using ECommerce.OrderService.Data;
+using ECommerce.OrderService.Kafka;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,9 @@ builder.Services.AddDbContext<OrderDbContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IKafkaProducer, KafkaProducer>();
+
+//hosted service for kafka consumer to listen to the topic background task
+builder.Services.AddHostedService<OrderConsumer>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

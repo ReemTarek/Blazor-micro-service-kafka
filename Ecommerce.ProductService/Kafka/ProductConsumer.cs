@@ -10,7 +10,7 @@ namespace Ecommerce.ProductService.Kafka
 {
     public class ProductConsumer(IServiceProvider serviceProvider, IKafkaProducer kafkaProducer) : KafkaConsumer(topics)
     {
-        private static readonly string[] topics = { "order-created" };
+        private static readonly string[] topics = { "order-created", "payment-failed" };
         //pass the topics list in consumer constructor
         private ProductDbContext GetDbContext()
         {
@@ -24,6 +24,9 @@ namespace Ecommerce.ProductService.Kafka
             {
                 case "order-created":
                     await HandleOrderCreated(consumeResult.Message.Value);
+                    break;
+                case "payment-failed":
+                    await HandlePaymentFailed(consumeResult.Message.Value);
                     break;
             }
         }
@@ -61,6 +64,22 @@ namespace Ecommerce.ProductService.Kafka
                 product.Quantity -= order.Quantity;
                 await dbcontext.SaveChangesAsync();
                 return true;
+            }
+        }
+        public async Task HandlePaymentFailed(string message)
+        {
+            if (message != null)
+            {
+                var orderMessage = JsonConvert.DeserializeObject<OrderModel>(message);
+                using var dbcontext = GetDbContext();
+                var product = await dbcontext.Products.FirstOrDefaultAsync(p => p.Id == orderMessage.ProductId);
+                if (product != null)
+                {
+                    product.Quantity += orderMessage.Quantity;
+                    await dbcontext.SaveChangesAsync();
+                }
+                await kafkaProducer.ProduceAsync("product-reservation-cancel", orderMessage);
+
             }
         }
     }
