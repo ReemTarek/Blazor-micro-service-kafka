@@ -1,7 +1,7 @@
 ﻿using Confluent.Kafka;
+using ECommerce.Common;
 using ECommerce.Model;
 using ECommerce.OrderService.Data;
-using ECommerce.OrderService.Kafka;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,14 +22,11 @@ namespace ECommerce.OrderService.Controllers
         public async Task<OrderModel> CreateOrder(OrderModel order)
         {
             order.OrderDate = DateTime.Now;
+            order.Status = "Pending";
             dbContext.Orders.Add(order);
             await dbContext.SaveChangesAsync();
             //need kafka for message passing
-            await producer.ProductAsync("order-topic", new Message<string, string>
-            {
-                Key = order.Id.ToString(),
-                Value = JsonSerializer.Serialize(order)
-            });
+            await producer.ProduceAsync("order-created",order);
             return order;
         }
     }

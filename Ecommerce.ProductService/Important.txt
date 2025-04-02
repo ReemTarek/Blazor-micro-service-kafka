@@ -1,0 +1,17 @@
+﻿regarding topic subscription
+we've added manaually topic to subscribe in order to run the application
+in producer there was a topic order created
+in consumer it was not created and gave error
+so we've added it manually in docker
+1- open docker desktop
+2- click on the container
+3- choose kafka image
+4- open terminal and write the following commands:
+--navigate to bin folder:
+cd /bin
+--check if topic exists:
+
+kafka-topics --bootstrap-server localhost:9092 --list
+
+--add the topic:
+kafka-topics --bootstrap-server localhost:9092 --create --topic order-created

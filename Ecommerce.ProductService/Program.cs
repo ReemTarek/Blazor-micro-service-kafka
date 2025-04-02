@@ -1,5 +1,6 @@
 using Ecommerce.ProductService.Data;
 using Ecommerce.ProductService.Kafka;
+using ECommerce.Common;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +14,9 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 //kafka
-builder.Services.AddHostedService<KafkaConsumer>();
+builder.Services.AddSingleton<IKafkaProducer, KafkaProducer>();
+//hosted service for kafka consumer to listen to the topic background task
+builder.Services.AddHostedService<ProductConsumer>();
 builder.Services.AddDbContext<ProductDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ProductDbContext")));
 var app = builder.Build();
